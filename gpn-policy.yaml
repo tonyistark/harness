@@ -1,0 +1,105 @@
+# GPN harness policy — the one place that states what agents may do.
+# `gpn policy compile` turns this into .gpn/claude-settings.json and
+# .gpn/mcp.json; `gpn hook` enforces the same rules from inside Claude Code.
+version: 1
+autonomy: supervised            # autonomous | supervised | manual
+claude_code_version: ">=2.1.300"
+
+sandbox:
+  required: true                # fail closed when the sandbox is unavailable
+  network_allow:
+    - github.com
+    - api.github.com
+    - bedrock-runtime.us-east-1.amazonaws.com
+    - api.anthropic.com
+
+protected_paths:
+  - ".git/hooks/**"
+  - ".claude/**"
+  - ".gpn/**"
+  - gpn-policy.yaml
+  - gpn-constitution.md
+  - "~/.ssh/**"
+  - "~/.aws/**"
+
+commands:
+  deny:
+    - "git push --force*"
+    - "git push -f*"
+    - "rm -rf *"
+    - "rm -fr *"
+    - "DROP TABLE*"
+    - "DROP DATABASE*"
+    - "kubectl delete*"
+    - "terraform destroy*"
+  approve:
+    - "git push*"
+    - "terraform apply*"
+    - "kubectl apply*"
+
+tools:
+  allow:
+    - Read
+    - Grep
+    - Glob
+    - Edit
+    - Write
+    - "Bash(go build *)"
+    - "Bash(go test *)"
+    - "Bash(go vet *)"
+    - "Bash(git status *)"
+    - "Bash(git diff *)"
+    - "Bash(git log *)"
+    - "Bash(git add *)"
+    - "Bash(git commit *)"
+    - "mcp__gpn__trace_query"
+    - "mcp__jira__get_*"
+    - "mcp__github__get_*"
+  approve:
+    - "mcp__github__create_pull_request"
+  deny:
+    - WebFetch
+    - WebSearch
+    - "mcp__github__delete_*"
+
+approval_classes:
+  production_path:
+    paths: ["deploy/**", "infra/**", "helm/**"]
+    approvers: ["role:release-manager"]
+    two_person: true
+    timeout: 24h
+  schema_change:
+    paths: ["migrations/**", "**/*.sql"]
+    approvers: ["role:dba"]
+    timeout: 24h
+
+models:
+  catalog: .gpn/model-catalog.json   # signed; model IDs live here, never in workflows
+  route: bedrock                     # anthropic is the alternate route
+  tiers:
+    opus:   { catalog: opus,   fallback: sonnet }
+    sonnet: { catalog: sonnet, fallback: haiku }
+    haiku:  { catalog: haiku }
+  classes:
+    design: opus
+    review: opus
+    implement: sonnet
+    mechanical: haiku
+
+budgets:
+  per_step_usd: 2.00
+  per_run_usd: 25.00
+  alert_at: 0.8
+
+registry:
+  tiers_allowed: [official, custom]
+  require_signature: true
+
+# Layer 1 / Layer 2 gate commands for this repository. The workflow names the
+# check (build, test, coverage>=80, sast, sca); this maps each to a command.
+gates:
+  build: "go build ./..."
+  test: "go test ./... -coverprofile=.gpn/cover.out"
+  coverage: "go tool cover -func=.gpn/cover.out | tail -1"
+  sast: "go vet ./..."
+  sca: "echo 'sca: configure Nexus IQ / govulncheck here' && true"

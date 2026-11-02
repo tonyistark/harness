@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["verdict"],
+  "properties": {
+    "verdict": { "type": "string", "enum": ["pass", "changes_requested"] },
+    "findings": { "type": "array", "items": { "type": "object", "properties": { "file": {"type": "string"}, "line": {"type": "integer"}, "severity": {"type": "string"}, "note": {"type": "string"} } } }
+  }
+}

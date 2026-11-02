@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["requirements"],
+  "properties": {
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "text", "priority"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^REQ-[A-Za-z0-9-]+$" },
+          "text": { "type": "string", "description": "EARS form: WHEN <trigger> THE SYSTEM SHALL <response>" },
+          "priority": { "type": "string", "enum": ["must", "should", "could"] },
+          "clarifications": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

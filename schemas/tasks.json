@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "required": ["tasks"],
+  "properties": {
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "class", "requirements", "files"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^T[0-9]+$" },
+          "title": { "type": "string" },
+          "class": { "type": "string", "enum": ["implement", "mechanical"] },
+          "requirements": { "type": "array", "items": { "type": "string" } },
+          "files": { "type": "array", "items": { "type": "string" } },
+          "depends_on": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

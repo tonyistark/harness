@@ -1,0 +1,8 @@
+/gpn
+/dist/
+*.db
+*.db-wal
+*.db-shm
+.gpn/wt/
+.gpn/stop/
+.gpn/traces/

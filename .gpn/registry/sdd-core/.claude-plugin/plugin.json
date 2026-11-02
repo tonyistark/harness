@@ -1,0 +1,6 @@
+{
+  "name": "sdd-core",
+  "version": "0.1.0",
+  "description": "GPN spec-driven development skills: intake, design, tasks, implement, review, open-pr",
+  "author": { "name": "GPN Platform" }
+}

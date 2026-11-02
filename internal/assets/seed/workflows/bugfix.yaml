@@ -1,0 +1,29 @@
+# Quick path for small changes: no approval gate before design, one task.
+name: bugfix
+version: 1
+inputs:
+  jira: { type: string, required: true }
+defaults:
+  route: bedrock
+  budget_usd: 1.00
+steps:
+  - id: intake
+    kind: agent
+    class: implement
+    skill: gpn/sdd-intake@0.1.0
+    output_schema: schemas/requirements.json
+  - id: fix
+    kind: agent
+    class: implement
+    after: [intake]
+    skill: gpn/implement@0.1.0
+  - id: review
+    kind: agent
+    class: review
+    after: [fix]
+    skill: gpn/review@0.1.0
+    output_schema: schemas/verdict.json
+  - id: gates
+    kind: gate
+    after: [review]
+    checks: [build, test, sast]

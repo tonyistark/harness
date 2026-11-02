@@ -1,0 +1,19 @@
+# Eval case for the sdd-intake skill. Format follows `claude plugin eval init`;
+# re-scaffold with that command if the schema has moved.
+name: intake-basic
+description: A plain ticket becomes EARS requirements with IDs and priorities.
+prompt: |
+  /sdd-intake
+  Ticket GPN-42: "When a settlement file arrives from the network partner, validate its
+  checksum before processing. If validation fails, quarantine the file and alert the
+  operations channel."
+runs: 3
+graders:
+  - type: file_exists
+    path: specs/GPN-42/requirements.md
+  - type: regex
+    pattern: "REQ-GPN-42-0[1-9]"
+  - type: regex
+    pattern: "THE SYSTEM SHALL"
+  - type: llm
+    rubric: "PASS if every requirement is in EARS form with an ID and a priority and no design or code appears. FAIL otherwise."

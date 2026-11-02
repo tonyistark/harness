@@ -1,0 +1,32 @@
+{
+  "_comment": "Signed catalog of approved models. Replace the model ids with the identifiers approved for your Bedrock account and Anthropic organization; prices are per million tokens and are placeholders to be set from the current price list. Sign with `gpn registry sign-catalog` at GA; the prototype records the file hash on every run.",
+  "models": {
+    "opus": {
+      "route": {
+        "bedrock": "us.anthropic.<approved-opus-inference-profile>",
+        "anthropic": "<approved-opus-model-id>"
+      },
+      "price_in_per_mtok": 15.0,
+      "price_out_per_mtok": 75.0,
+      "cleared_classes": ["design", "review", "implement", "mechanical"]
+    },
+    "sonnet": {
+      "route": {
+        "bedrock": "us.anthropic.<approved-sonnet-inference-profile>",
+        "anthropic": "<approved-sonnet-model-id>"
+      },
+      "price_in_per_mtok": 3.0,
+      "price_out_per_mtok": 15.0,
+      "cleared_classes": ["review", "implement", "mechanical"]
+    },
+    "haiku": {
+      "route": {
+        "bedrock": "us.anthropic.<approved-haiku-inference-profile>",
+        "anthropic": "<approved-haiku-model-id>"
+      },
+      "price_in_per_mtok": 0.8,
+      "price_out_per_mtok": 4.0,
+      "cleared_classes": ["implement", "mechanical"]
+    }
+  }
+}

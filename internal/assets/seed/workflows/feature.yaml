@@ -1,0 +1,77 @@
+# Spec-driven feature workflow (Demo 1: Spec to PR).
+# class never names a model; gpn-policy.yaml maps class -> tier -> catalog alias.
+name: feature
+version: 1
+inputs:
+  jira: { type: string, required: true }
+defaults:
+  route: bedrock
+  budget_usd: 2.00
+steps:
+  - id: intake
+    kind: agent
+    class: design
+    skill: gpn/sdd-intake@0.1.0
+    prompt: prompts/intake.md
+    output_schema: schemas/requirements.json
+
+  - id: approve_requirements
+    kind: approval
+    after: [intake]
+    approvers: [role:product-owner]
+    timeout: 48h
+
+  - id: design
+    kind: agent
+    class: design
+    after: [approve_requirements]
+    skill: gpn/sdd-design@0.1.0
+    output_schema: schemas/design.json
+
+  - id: tasks
+    kind: agent
+    class: implement
+    after: [design]
+    skill: gpn/sdd-tasks@0.1.0
+    output_schema: schemas/tasks.json
+
+  - id: implement
+    kind: parallel
+    after: [tasks]
+    for_each: ${steps.tasks.output.tasks}
+    max_concurrency: 4
+    isolation: worktree
+    step:
+      kind: agent
+      class: ${item.class | implement}
+      skill: gpn/implement@0.1.0
+
+  - id: review
+    kind: parallel
+    after: [implement]
+    for_each: ${steps.tasks.output.tasks}
+    max_concurrency: 4
+    step:
+      kind: agent
+      class: review
+      skill: gpn/review@0.1.0
+      output_schema: schemas/verdict.json
+      retry_on: changes_requested
+      max_loops: 1
+
+  - id: gates
+    kind: gate
+    after: [review]
+    checks: [build, test, "coverage>=80", sast, sca]
+
+  - id: merge
+    kind: shell
+    after: [gates]
+    command: gpn internal merge --run ${run.id}
+
+  - id: pr
+    kind: agent
+    class: mechanical
+    after: [merge]
+    skill: gpn/open-pr@0.1.0
+    tools: [mcp__github__create_pull_request]

@@ -1,0 +1,7 @@
+gpn.db*
+wt/
+stop/
+traces/
+cover.out
+claude-settings.json
+mcp.json
